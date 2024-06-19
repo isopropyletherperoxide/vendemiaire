@@ -1,4 +1,5 @@
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use if" #-}
 module Main (main) where
 
 import Lib
@@ -30,18 +31,20 @@ main = greet =<< execParser opts
     opts = info (sample <**> helper)
       ( fullDesc
      <> progDesc "Print a greeting for TARGET"
-     <> header "hello - a test for optparse-applicative" )
+     <> header "vendemiare - a gregorian to french republican date converter" )
 
 greet :: Sample -> IO ()
-greet (Sample inDate False) = do
+greet (Sample inDate frenchmode) = do
         today <- case inDate of
           Just a -> maybe exitFailure return (dateFromArg a)
           Nothing -> do
                   toop <- todaysDate
                   maybe exitFailure return (properDateToFrench (Just toop))
-        print $ frenchDateToString today
-greet _ = return ()
+        case frenchmode of
+          True -> putStrLn $ frenchDateToString today
+          False -> putStrLn $ frenchPrint today
 
+dateFromArg :: String -> Maybe (Int, RepublicanMonth, Int)
 dateFromArg = properDateToFrench . properDate . dateFromArg1
 
 todaysDate :: IO (Integer,Int,Int) -- :: (year,month,day)
