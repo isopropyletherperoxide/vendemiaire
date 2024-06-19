@@ -41,8 +41,8 @@ greet (Sample inDate frenchmode) = do
                   toop <- todaysDate
                   maybe exitFailure return (properDateToFrench (Just toop))
         case frenchmode of
-          True -> putStrLn $ frenchDateToString today
-          False -> putStrLn $ frenchPrint today
+          True -> putStrLn $ frenchPrint today
+          False -> putStrLn $ frenchDateToString today
 
 dateFromArg :: String -> Maybe (Int, RepublicanMonth, Int)
 dateFromArg = properDateToFrench . properDate . dateFromArg1
