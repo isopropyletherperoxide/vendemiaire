@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 module Main (main) where
 
 import Lib
@@ -6,6 +7,7 @@ import Data.Time (parseTimeM, defaultTimeLocale, toGregorian)
 import Data.Time.Calendar (Day)
 import System.Exit (exitFailure, ExitCode (ExitFailure))
 import Data.Time.Clock
+import Lib (frenchDateToString)
 
 data Sample = Sample
   { date      :: Maybe String
@@ -13,7 +15,7 @@ data Sample = Sample
 
 sample :: Parser Sample
 sample = Sample
-      <$> optional (strOption 
+      <$> optional (strOption
           ( long "date"
          <> metavar "TARGET"
          <> help "Target for the greeting" ) )
@@ -31,14 +33,13 @@ main = greet =<< execParser opts
      <> header "hello - a test for optparse-applicative" )
 
 greet :: Sample -> IO ()
-greet (Sample (Just h) False) = do 
-        let haha = dateFromArg h
-        case haha of 
-          Just a -> putStrLn $ show a
-          Nothing -> exitFailure
-greet (Sample Nothing False) = do
-        today <- todaysDate
-        maybe (putStrLn "Error!") print (properDateToFrench (Just today)) 
+greet (Sample inDate False) = do
+        today <- case inDate of
+          Just a -> maybe exitFailure return (dateFromArg a)
+          Nothing -> do
+                  toop <- todaysDate
+                  maybe exitFailure return (properDateToFrench (Just toop))
+        print $ frenchDateToString today
 greet _ = return ()
 
 dateFromArg = properDateToFrench . properDate . dateFromArg1
@@ -46,10 +47,10 @@ dateFromArg = properDateToFrench . properDate . dateFromArg1
 todaysDate :: IO (Integer,Int,Int) -- :: (year,month,day)
 todaysDate = getCurrentTime >>= return . toGregorian . utctDay
 
+
 properDateToFrench :: Maybe (Integer, Int, Int) -> Maybe (Int, RepublicanMonth, Int)
 properDateToFrench (Just (a, b, c)) = return $ dateToFrench (fromInteger a) b c
 properDateToFrench Nothing = Nothing
-
 
 properDate :: Maybe Day -> Maybe (Integer, Int, Int)
 properDate (Just a) = return $ toGregorian a
